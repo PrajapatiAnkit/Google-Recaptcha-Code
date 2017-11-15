@@ -1,13 +1,96 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-	<title>Git</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login With Google reCaptcha</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+
 </head>
-<body>
-  <center>
-  	<h1>
-  		This is my git hub website
-  	</h1>
-  </center>
+<body style="padding-top: 50px;">
+   <div class="container">
+       <form action="xbcx" method="post">
+      <div class="row">
+          <div class="col-md-6">
+              <label>Username : </label>
+              <div class="form-group">
+                  <input type="text" name="username" class="form-control"/>
+              </div>
+          </div>
+      </div>
+       <div class="row">
+           <div class="col-md-6">
+               <label>Password : </label>
+               <div class="form-group">
+                   <input type="password" name="password" class="form-control"/>
+               </div>
+           </div>
+       </div>
+       <div class="row">
+           <div class="col-md-6">
+               <div class="g-recaptcha" data-sitekey="****REPLACE WITH YOUR SITE KEY*****"></div>
+           </div>
+       </div>
+       <div class="row">
+           <div class="col-md-6">
+               <div class="form-group">
+                  <input type="submit" name="loginBtn" class="btn btn-success"/>
+               </div>
+           </div>
+       </div>
+       </form>
+   </div>
 </body>
 </html>
+
+<?php
+if (isset($_POST['loginBtn'])){
+    $username = $_POST['username']; // comming from form
+    $password = $_POST['password'];// comming from form
+
+
+    function CheckCaptcha($userResponse) {
+        $fields_string = '';
+        $fields = array(
+            'secret' => '*****REPLACE WITH YOUR secret KEY*****',
+            'response' => $userResponse
+        );
+        foreach($fields as $key=>$value)
+            $fields_string .= $key . '=' . $value . '&';
+        $fields_string = rtrim($fields_string, '&');
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+        curl_setopt($ch, CURLOPT_POST, count($fields));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
+
+        $res = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($res, true);
+    }
+
+
+    // Call the function CheckCaptcha
+    $result = CheckCaptcha($_POST['g-recaptcha-response']);
+
+    if ($result['success']) {
+        //If the user has checked the Captcha box
+       // echo "Captcha verified Successfully";
+        if ($username == 'ankit' && $password == 123){
+            echo "Capctha Is verified !,You can login !";
+        } else{
+            echo '<script>alert("Login Failed !");</script>';
+
+        }
+
+    } else {
+        // If the CAPTCHA box wasn't checked
+        echo '<script>alert("Error Message");</script>';
+    }
+
+}
